@@ -1,7 +1,7 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_layout/basic_screen.dart';
-import 'package:flutter_layout/home.dart';
+import 'image_picker.dart';
+import 'app_drawer.dart';
+import 'splash_screen.dart';
 
 void main() => runApp(StaticApp());
 
@@ -11,19 +11,16 @@ class StaticApp extends StatelessWidget {
     return MaterialApp(
       theme: ThemeData(
         brightness: Brightness.light,
-        primaryColor: Colors.brown.shade50,
+        primaryColor: Color(0xFFEC615A), // Change the primary color to red
         appBarTheme: AppBarTheme(
           elevation: 10,
           titleTextStyle: TextStyle(
-            // change from TextTheme
-            fontFamily: 'Babylonica',
+            fontFamily: 'Poppins',
             fontSize: 24,
           ),
         ),
       ),
-      home: HomeScreen(),
+      home: SplashScreen(),
     );
   }
 }
-
-//fontFamily: 'Babylonica',

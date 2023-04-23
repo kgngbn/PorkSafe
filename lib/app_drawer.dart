@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_layout/basic_screen.dart';
-import 'package:flutter_layout/home.dart';
+import 'image_picker.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -11,9 +10,9 @@ class AppDrawer extends StatelessWidget {
         children: [
           const DrawerHeader(
             decoration: BoxDecoration(
-              color: Colors.brown,
+              color: Color(0xFFEC615A),
               image: DecorationImage(
-                image: AssetImage("images/icon.jpg"),
+                image: AssetImage("images/logo.png"),
                 fit: BoxFit.contain,
               ),
             ),
@@ -23,7 +22,7 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => HomeScreen()),
+                MaterialPageRoute(builder: (context) => MyHomePage()),
               );
             },
             child: ListTile(
@@ -37,7 +36,7 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => BasicScreen()),
+                MaterialPageRoute(builder: (context) => MyHomePage()),
               );
             },
             child: ListTile(
