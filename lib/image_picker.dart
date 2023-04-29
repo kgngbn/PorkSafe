@@ -18,6 +18,13 @@ class _MyHomePageState extends State<MyHomePage> {
     setState(() {
       _imageFile = File(pickedFile.path);
     });
+
+    // Here you can add the code for scanning the image using your Python script
+    // You can pass the path of the selected image to your Python script
+    // and then retrieve the result from your Python script and display it
+    // in the UI.
+    // You can use the Process class from the dart:io library to execute
+    // your Python script and retrieve its output.
   }
 
   @override
