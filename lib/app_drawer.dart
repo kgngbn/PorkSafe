@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_layout/settings.dart';
+import 'about.dart';
 import 'image_picker.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -36,7 +38,7 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => MyHomePage()),
+                MaterialPageRoute(builder: (context) => AboutPage()),
               );
             },
             child: ListTile(
@@ -52,11 +54,19 @@ class AppDrawer extends StatelessWidget {
             ),
             title: const Text('Activity'),
           ),
-          ListTile(
-            leading: Icon(
-              Icons.settings_outlined,
+          GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            },
+            child: ListTile(
+              leading: Icon(
+                Icons.settings_outlined,
+              ),
+              title: const Text('Settings'),
             ),
-            title: const Text('Settings'),
           ),
         ],
       ),
