@@ -54,18 +54,14 @@ class _MyHomePage extends State<MyHomePage> {
     super.dispose();
   }
 
-  Future pickImage() async {
-    try {
-      var image = await ImagePicker.pickImage(source: ImageSource.gallery);
-      if (image == null) return null;
-      setState(() {
-        _loading = true;
-        _image = image as File;
-      });
-      classifyImage(_image);
-    } catch (e) {
-      print(e);
-    }
+  pickImage() async {
+    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    if (image == null) return null;
+    setState(() {
+      _loading = true;
+      _image = image as File;
+    });
+    classifyImage(_image);
   }
 
   @override
@@ -121,13 +117,7 @@ class _MyHomePage extends State<MyHomePage> {
             ),
             FloatingActionButton(
               tooltip: 'Pick Image',
-              onPressed: () async {
-                var image =
-                    await ImagePicker.pickImage(source: ImageSource.gallery);
-                if (image != null) {
-                  // Do something with the image
-                }
-              },
+              onPressed: pickImage,
               child: Icon(
                 Icons.add_a_photo,
                 size: 20,
