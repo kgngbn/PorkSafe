@@ -5,7 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'app_drawer.dart'; // Importing the AppDrawer file
 
-File _imageFile;
+File? _imageFile;
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -16,7 +16,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().getImage(source: source);
     setState(() {
-      _imageFile = File(pickedFile.path);
+      _imageFile = pickedFile != null ? File(pickedFile.path) : null;
     });
 
     // Here you can add the code for scanning the image using your Python script
@@ -96,7 +96,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   SizedBox(height: 20),
                   _imageFile != null
                       ? Image.file(
-                          _imageFile,
+                          _imageFile!,
                           width: 300,
                           height: 300,
                           fit: BoxFit.cover,
