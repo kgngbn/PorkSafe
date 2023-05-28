@@ -1,127 +1,143 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
-import 'app_drawer.dart'; // Importing the AppDrawer file
-
-File? _imageFile;
+import 'package:tflite/tflite.dart';
 
 class MyHomePage extends StatefulWidget {
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePage createState() => _MyHomePage();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  Future<void> _pickImage(ImageSource source) async {
-    final pickedFile = await ImagePicker().getImage(source: source);
-    setState(() {
-      _imageFile = pickedFile != null ? File(pickedFile.path) : null;
+class _MyHomePage extends State<MyHomePage> {
+  late List _outputs;
+  late File _image;
+  bool _loading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _loading = true;
+
+    loadModel().then((value) {
+      setState(() {
+        _loading = false;
+      });
     });
+  }
 
-    // Here you can add the code for scanning the image using your Python script
-    // You can pass the path of the selected image to your Python script
-    // and then retrieve the result from your Python script and display it
-    // in the UI.
-    // You can use the Process class from the dart:io library to execute
-    // your Python script and retrieve its output.
+  loadModel() async {
+    await Tflite.loadModel(
+      model: "assets/model_unquant.tflite",
+      labels: "assets/labels.txt",
+      numThreads: 1,
+    );
+  }
 
-    if (_imageFile != null) {
-      // Create a new Process object.
-      final process =
-          Process.start('python', ['python_cnn.py', _imageFile!.path]);
+  classifyImage(File image) async {
+    var output = await Tflite.runModelOnImage(
+        path: image.path,
+        imageMean: 0.0,
+        imageStd: 255.0,
+        numResults: 2,
+        threshold: 0.2,
+        asynch: true);
+    setState(() {
+      _loading = false;
+      _outputs = output!;
+    });
+  }
 
-      // Get the output of the Python CNN code.
-      final output = await process.stdout.readAsString();
+  @override
+  void dispose() {
+    Tflite.close();
+    super.dispose();
+  }
 
-      // Display the output of the Python CNN code in the UI.
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(output)));
+  Future pickImage() async {
+    try {
+      var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+      if (image == null) return null;
+      setState(() {
+        _loading = true;
+        _image = image as File;
+      });
+      classifyImage(_image);
+    } catch (e) {
+      print(e);
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFFFAE9),
       appBar: AppBar(
-        backgroundColor: Color(0xFFEC615A),
-        title: Text('PORKIFIER',
-            style: GoogleFonts.poppins(fontSize: 20, color: Colors.white)),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Icon(Icons.edit),
-          ),
-        ],
+        centerTitle: true,
+        title: Text(
+          "Tensorflow Lite",
+          style: TextStyle(color: Colors.white, fontSize: 25),
+        ),
+        backgroundColor: Colors.amber,
+        elevation: 0,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(0.5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'images/logo.png',
-                    height: 200,
-                    fit: BoxFit.contain,
-                  ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Scan Pork to Detect Spoilage or Freshness',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 25,
-                      fontWeight: FontWeight.bold,
+      body: Container(
+        color: Colors.white,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            _loading
+                ? Container(
+                    height: 300,
+                    width: 300,
+                  )
+                : Container(
+                    margin: EdgeInsets.all(20),
+                    width: MediaQuery.of(context).size.width,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: <Widget>[
+                        // ignore: unnecessary_null_comparison
+                        _image == null ? Container() : Image.file(_image),
+                        SizedBox(
+                          height: 20,
+                        ),
+                        // ignore: unnecessary_null_comparison
+                        _image == null
+                            ? Container()
+                            // ignore: unnecessary_null_comparison
+                            : _outputs != null
+                                ? Text(
+                                    _outputs[0]["label"],
+                                    style: TextStyle(
+                                        color: Colors.black, fontSize: 20),
+                                  )
+                                : Container(child: Text(""))
+                      ],
                     ),
                   ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      _pickImage(ImageSource.gallery);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFF5347D9),
-                      textStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                      ),
-                    ),
-                    child: Text('Select from gallery'),
-                  ),
-                  SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      _pickImage(ImageSource.camera);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFF5347D9),
-                      textStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                      ),
-                    ),
-                    child: Text('Take a photo'),
-                  ),
-                  SizedBox(height: 20),
-                  _imageFile != null
-                      ? Image.file(
-                          _imageFile!,
-                          width: 300,
-                          height: 300,
-                          fit: BoxFit.cover,
-                        )
-                      : Container(),
-                ],
-              ),
+            SizedBox(
+              height: MediaQuery.of(context).size.height * 0.01,
             ),
-          ),
-        ],
+            FloatingActionButton(
+              tooltip: 'Pick Image',
+              onPressed: () async {
+                var image =
+                    await ImagePicker.pickImage(source: ImageSource.gallery);
+                if (image != null) {
+                  // Do something with the image
+                }
+              },
+              child: Icon(
+                Icons.add_a_photo,
+                size: 20,
+                color: Colors.white,
+              ),
+              backgroundColor: Colors.amber,
+            ),
+          ],
+        ),
       ),
-      drawer: AppDrawer(), // Adding the AppDrawer widget to the drawer property
     );
   }
 }
