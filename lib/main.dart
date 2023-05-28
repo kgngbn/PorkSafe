@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'image_picker.dart';
-import 'app_drawer.dart';
 import 'splash_screen.dart';
 
 void main() => runApp(StaticApp());

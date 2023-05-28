@@ -70,9 +70,9 @@ class _SettingsPageState extends State<SettingsPage> {
             SizedBox(height: 10),
             DropdownButton(
               value: _language,
-              onChanged: (newValue) {
+              onChanged: (String? newValue) {
                 setState(() {
-                  _language = newValue;
+                  _language = newValue!;
                 });
               },
               items: _languageOptions.map((language) {

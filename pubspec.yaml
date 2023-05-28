@@ -14,25 +14,34 @@ description: A new Flutter project.
 version: 1.0.0+1
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: '>=3.0.1 <4.0.0'
 
 dependencies:
+  lottie: ^2.2.0
   flutter:
     sdk: flutter
-  image_picker: ^0.8.4+3
+  cupertino_icons: ^1.0.3
+  convert: ^3.0.1
+  firebase_core: ^2.12.0
+  firebase_storage: ^11.2.0
+  cloud_firestore: ^4.7.0
+  firebase_core_platform_interface: ^4.8.0
+  tflite: ^1.1.2
+
+
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
-  cupertino_icons: ^0.1.2
-  google_fonts: ^2.0.0
+  google_fonts: ^4.0.4
+  image_picker: ^0.8.7+5
+  cached_network_image: ^3.2.3
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
 # To add assets to your application, add an assets section, like this:
-assets:
-  - assets/icon.jpg
+
 
 
 # For information on the generic Dart part of this file, see the
@@ -46,3 +55,5 @@ flutter:
       fonts:
         - asset: assets/Babylonica-Regular.ttf
 
+assets:
+  - assets/

@@ -25,6 +25,19 @@ class _MyHomePageState extends State<MyHomePage> {
     // in the UI.
     // You can use the Process class from the dart:io library to execute
     // your Python script and retrieve its output.
+
+    if (_imageFile != null) {
+      // Create a new Process object.
+      final process =
+          Process.start('python', ['python_cnn.py', _imageFile!.path]);
+
+      // Get the output of the Python CNN code.
+      final output = await process.stdout.readAsString();
+
+      // Display the output of the Python CNN code in the UI.
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(output)));
+    }
   }
 
   @override
