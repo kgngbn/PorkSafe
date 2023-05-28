@@ -58,3 +58,5 @@ flutter:
 assets:
   - assets/
   - assets/labels.txt
+  - assets/my_model.tflite
+  - assets/labels.txt
