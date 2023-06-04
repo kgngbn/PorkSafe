@@ -4,8 +4,10 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'app_drawer.dart';
 import 'package:tflite/tflite.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 File? _imageFile;
+List<dynamic>? _recognitions;
 
 class MyHomePage extends StatefulWidget {
   @override
@@ -26,7 +28,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
 
     await Tflite.loadModel(
-      model: 'assets/my_model.tflite',
+      model: 'assets/tflite_model_another.tflite',
       labels: 'assets/labels.txt',
     );
 
@@ -34,7 +36,18 @@ class _MyHomePageState extends State<MyHomePage> {
       path: _imageFile!.path,
     );
 
-    print(recognitions);
+    String result = 'Unknown';
+
+    if (recognitions != null && recognitions.isNotEmpty) {
+      result = recognitions[0]['label'];
+    }
+
+    // Show the classification result as a SnackBar or a Toast
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('The pork is $result.'),
+      ),
+    );
 
     Tflite.close();
   }
@@ -52,7 +65,7 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         backgroundColor: Color(0xFFEC615A),
         title: Text(
-          'PORKIFIER',
+          'PorkSafe',
           style: GoogleFonts.poppins(fontSize: 20, color: Colors.white),
         ),
         actions: <Widget>[
@@ -71,8 +84,15 @@ class _MyHomePageState extends State<MyHomePage> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Image.asset(
-                    'images/logo.png',
+                  _imageFile != null
+                      ? Image.file(
+                    _imageFile!,
+                    width: 300,
+                    height: 300,
+                    fit: BoxFit.cover,
+                  )
+                      : Image.asset(
+                    'assets/logo.png',
                     height: 200,
                     fit: BoxFit.contain,
                   ),
@@ -113,15 +133,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                     child: Text('Take a photo'),
                   ),
-                  SizedBox(height: 20),
-                  _imageFile != null
-                      ? Image.file(
-                          _imageFile!,
-                          width: 300,
-                          height: 300,
-                          fit: BoxFit.cover,
-                        )
-                      : Container(),
                   SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: _classifyImage,

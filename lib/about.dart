@@ -22,7 +22,7 @@ class AboutPage extends StatelessWidget {
             ),
             SizedBox(height: 10),
             Text(
-              'Porkifier',
+              'PorkSafe',
               style: GoogleFonts.poppins(
                 fontSize: 30,
                 fontWeight: FontWeight.bold,

@@ -27,6 +27,7 @@ dependencies:
   cloud_firestore: ^4.7.0
   firebase_core_platform_interface: ^4.8.0
   tflite: ^1.1.2
+  fluttertoast: ^8.0.8
 
 
 
@@ -55,8 +56,7 @@ flutter:
       fonts:
         - asset: assets/Babylonica-Regular.ttf
 
-assets:
-  - assets/
-  - assets/labels.txt
-  - assets/my_model.tflite
-  - assets/labels.txt
+  assets:
+    - assets/
+    - assets/labels.txt
+    - assets/tflite_model_another.tflite
