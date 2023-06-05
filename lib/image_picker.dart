@@ -4,7 +4,6 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'app_drawer.dart';
 import 'package:tflite/tflite.dart';
-import 'package:fluttertoast/fluttertoast.dart';
 
 File? _imageFile;
 List<dynamic>? _recognitions;
@@ -15,6 +14,8 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  bool _isLoading = false;
+
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().getImage(source: source);
     setState(() {
@@ -27,29 +28,40 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
+    setState(() {
+      _isLoading = true;
+    });
+
     await Tflite.loadModel(
       model: 'assets/tflite_model_another.tflite',
       labels: 'assets/labels.txt',
     );
 
-    var recognitions = await Tflite.runModelOnImage(
-      path: _imageFile!.path,
-    );
+    try {
+      var recognitions = await Tflite.runModelOnImage(
+        path: _imageFile!.path,
+      );
 
-    String result = 'Unknown';
+      String result = 'Unknown';
 
-    if (recognitions != null && recognitions.isNotEmpty) {
-      result = recognitions[0]['label'];
+      if (recognitions != null && recognitions.isNotEmpty) {
+        result = recognitions[0]['label'];
+      }
+
+      // Show the classification result as a SnackBar or a Toast
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('The pork is $result.'),
+        ),
+      );
+    } catch (e) {
+      print('Error classifying image: $e');
+    } finally {
+      Tflite.close();
+      setState(() {
+        _isLoading = false;
+      });
     }
-
-    // Show the classification result as a SnackBar or a Toast
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('The pork is $result.'),
-      ),
-    );
-
-    Tflite.close();
   }
 
   @override
@@ -86,16 +98,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 children: [
                   _imageFile != null
                       ? Image.file(
-                    _imageFile!,
-                    width: 300,
-                    height: 300,
-                    fit: BoxFit.cover,
-                  )
+                          _imageFile!,
+                          width: 300,
+                          height: 300,
+                          fit: BoxFit.cover,
+                        )
                       : Image.asset(
-                    'assets/logo.png',
-                    height: 200,
-                    fit: BoxFit.contain,
-                  ),
+                          'assets/logo.png',
+                          height: 200,
+                          fit: BoxFit.contain,
+                        ),
                   SizedBox(height: 10),
                   Text(
                     'Scan Pork to Detect Spoilage or Freshness',
@@ -135,7 +147,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   SizedBox(height: 20),
                   ElevatedButton(
-                    onPressed: _classifyImage,
+                    onPressed: _isLoading ? null : _classifyImage,
                     style: ElevatedButton.styleFrom(
                       foregroundColor: Colors.white,
                       backgroundColor: Color(0xFF5347D9),
@@ -143,7 +155,9 @@ class _MyHomePageState extends State<MyHomePage> {
                         fontSize: 14,
                       ),
                     ),
-                    child: Text('Classify Image'),
+                    child: _isLoading
+                        ? CircularProgressIndicator() // Show loading indicator
+                        : Text('Classify Image'),
                   ),
                 ],
               ),
