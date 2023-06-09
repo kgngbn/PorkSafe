@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'app_drawer.dart';
-import 'package:tflite/tflite.dart';
+import 'package:tflite_flutter/tflite_flutter.dart';
 
 File? _imageFile;
 List<dynamic>? _recognitions;
@@ -32,15 +32,14 @@ class _MyHomePageState extends State<MyHomePage> {
       _isLoading = true;
     });
 
-    await Tflite.loadModel(
-      model: 'assets/tflite_model_another.tflite',
-      labels: 'assets/labels.txt',
-    );
-
     try {
       var recognitions = await Tflite.runModelOnImage(
-        path: _imageFile!.path,
-      );
+          path: _imageFile!.path,
+          imageMean: 0.0, // defaults to 117.0
+          imageStd: 255.0, // defaults to 1.0
+          numResults: 2, // defaults to 5
+          threshold: 0.2, // defaults to 0.1
+          asynch: true);
 
       String result = 'Unknown';
 
@@ -62,6 +61,20 @@ class _MyHomePageState extends State<MyHomePage> {
         _isLoading = false;
       });
     }
+  }
+
+  void loadModel() async {
+    await Tflite.loadModel(
+      model: 'assets/tflite_model.tflite',
+      labels: 'assets/labels.txt',
+    );
+  }
+
+  @override
+  void initState() {
+    loadModel();
+    // TODO: implement initState
+    super.initState();
   }
 
   @override
@@ -113,7 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     'Scan Pork to Detect Spoilage or Freshness',
                     textAlign: TextAlign.center,
                     style: GoogleFonts.poppins(
-                      fontSize: 25,
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                     ),
                   ),

@@ -28,6 +28,7 @@ dependencies:
   firebase_core_platform_interface: ^4.8.0
   tflite: ^1.1.2
   fluttertoast: ^8.0.8
+  tflite_flutter: ^0.10.1
 
 
 
@@ -36,6 +37,7 @@ dependencies:
   google_fonts: ^4.0.4
   image_picker: ^0.8.7+5
   cached_network_image: ^3.2.3
+  tflite_flutter: ^0.10.1
 
 dev_dependencies:
   flutter_test:
@@ -59,4 +61,4 @@ flutter:
   assets:
     - assets/
     - assets/labels.txt
-    - assets/tflite_model_another.tflite
+    - assets/tflite_model.tflite
