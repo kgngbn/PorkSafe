@@ -37,7 +37,8 @@ class _SplashScreenState extends State<SplashScreen> {
             SizedBox(height: 20),
             Text(
               'PorkSafe',
-              style: GoogleFonts.poppins(fontSize: 30),
+              style: GoogleFonts.poppins(
+                  fontSize: 30, fontWeight: FontWeight.bold),
             ),
           ],
         ),

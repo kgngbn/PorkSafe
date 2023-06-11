@@ -28,7 +28,6 @@ dependencies:
   firebase_core_platform_interface: ^4.8.0
   tflite: ^1.1.2
   fluttertoast: ^8.0.8
-  tflite_flutter: ^0.10.1
 
 
 

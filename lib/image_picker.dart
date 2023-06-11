@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:tflite/tflite.dart';
 import 'app_drawer.dart';
-import 'package:tflite_flutter/tflite_flutter.dart';
 
 File? _imageFile;
 List<dynamic>? _recognitions;
@@ -15,6 +15,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _isLoading = false;
+  bool _isModelBusy = false; // Flag to track interpreter busy state
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().getImage(source: source);
@@ -28,18 +29,23 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
+    if (_isModelBusy) return; // Exit early if model is busy
+
     setState(() {
       _isLoading = true;
     });
 
     try {
+      _isModelBusy = true; // Set the model as busy
+
       var recognitions = await Tflite.runModelOnImage(
-          path: _imageFile!.path,
-          imageMean: 0.0, // defaults to 117.0
-          imageStd: 255.0, // defaults to 1.0
-          numResults: 2, // defaults to 5
-          threshold: 0.2, // defaults to 0.1
-          asynch: true);
+        path: _imageFile!.path,
+        imageMean: 0.0, // defaults to 117.0
+        imageStd: 255.0, // defaults to 1.0
+        numResults: 2, // Set the number of results to 2
+        threshold: 0.2, // defaults to 0.1
+        asynch: true,
+      );
 
       String result = 'Unknown';
 
@@ -47,16 +53,54 @@ class _MyHomePageState extends State<MyHomePage> {
         result = recognitions[0]['label'];
       }
 
-      // Show the classification result as a SnackBar or a Toast
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('The pork is $result.'),
-        ),
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            title: Text('Classification Result'),
+            content: Text('The pork is $result.'),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: Text('OK'),
+              ),
+              TextButton(
+                onPressed: () {
+                  _pickImage(ImageSource.gallery);
+                  Navigator.of(context).pop();
+                },
+                child: Text('Choose Another Photo'),
+              ),
+            ],
+          );
+        },
       );
+
+      if (result == 'Spoiled') {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: Text('Spoiled Pork Detected!!!'),
+              content: Text('Please report this to the authorities.'),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
+                ),
+              ],
+            );
+          },
+        );
+      }
     } catch (e) {
       print('Error classifying image: $e');
     } finally {
-      Tflite.close();
+      _isModelBusy = false; // Set the model as not busy
       setState(() {
         _isLoading = false;
       });
@@ -73,7 +117,6 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   void initState() {
     loadModel();
-    // TODO: implement initState
     super.initState();
   }
 
@@ -91,7 +134,8 @@ class _MyHomePageState extends State<MyHomePage> {
         backgroundColor: Color(0xFFEC615A),
         title: Text(
           'PorkSafe',
-          style: GoogleFonts.poppins(fontSize: 20, color: Colors.white),
+          style: GoogleFonts.poppins(
+              fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
         ),
         actions: <Widget>[
           Padding(
@@ -169,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       ),
                     ),
                     child: _isLoading
-                        ? CircularProgressIndicator() // Show loading indicator
+                        ? CircularProgressIndicator()
                         : Text('Classify Image'),
                   ),
                 ],
