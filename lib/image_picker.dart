@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
@@ -9,6 +10,10 @@ File? _imageFile;
 List<dynamic>? _recognitions;
 
 class MyHomePage extends StatefulWidget {
+  final User? user; // Add a user field to the MyHomePage widget
+
+  MyHomePage({this.user}); // Modify the constructor to accept the user
+
   @override
   _MyHomePageState createState() => _MyHomePageState();
 }
@@ -222,7 +227,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      drawer: AppDrawer(),
+      drawer: AppDrawer(widget.user),
     );
   }
 }

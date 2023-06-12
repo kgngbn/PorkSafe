@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
-import 'splash_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'login_screen.dart';
 
-void main() => runApp(StaticApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
 
-class StaticApp extends StatelessWidget {
+class MyApp extends StatelessWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -18,7 +25,25 @@ class StaticApp extends StatelessWidget {
           ),
         ),
       ),
-      home: SplashScreen(),
+      home: HomePage(),
+    );
+  }
+}
+
+class HomePage extends StatefulWidget {
+  const HomePage({Key? key}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  // ...
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: LoginScreen(),
     );
   }
 }

@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "635342094555",
+    "project_id": "porksafe-e3cfb",
+    "storage_bucket": "porksafe-e3cfb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:635342094555:android:c538b8a92d393923134cfe",
+        "android_client_info": {
+          "package_name": "com.example.porksafe"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "635342094555-142k1sgof010bktidf5do5bhceu8tkca.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCS3s5ljKSxWpaIz_NvfboJocCcmL6Kkug"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "635342094555-142k1sgof010bktidf5do5bhceu8tkca.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
