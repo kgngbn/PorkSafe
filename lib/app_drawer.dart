@@ -2,14 +2,15 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_layout/profile_screen.dart';
 import 'package:flutter_layout/settings.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'about.dart';
-import 'image_picker.dart';
 import 'login_screen.dart';
 
 class AppDrawer extends StatelessWidget {
   final User? user;
+  final void Function() onProfileSelected;
 
-  AppDrawer(this.user);
+  AppDrawer(this.user, {required this.onProfileSelected});
 
   Future<void> _logout(BuildContext context) async {
     try {
@@ -19,84 +20,103 @@ class AppDrawer extends StatelessWidget {
         MaterialPageRoute(builder: (context) => LoginScreen()),
       );
     } catch (e) {
-      print('Failed to log out: $e');
+      print('Error during logout: $e');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Drawer(
-      child: SingleChildScrollView(
-        child: Column(
-          children: [
-            UserAccountsDrawerHeader(
-              accountName: user != null ? Text(user!.displayName ?? '') : null,
-              accountEmail: user != null ? Text(user!.email ?? '') : null,
-              currentAccountPicture: CircleAvatar(
-                child: Icon(Icons.person),
-                backgroundColor: Colors
-                    .transparent, // Set the background color to transparent
-              ),
-              decoration: BoxDecoration(
-                color: Color(0xFFEC615A),
-              ),
+      child: ListView(
+        padding: EdgeInsets.zero,
+        children: [
+          DrawerHeader(
+            decoration: BoxDecoration(
+              color: Color(0xFFEC615A),
             ),
-            ListTile(
-              leading: Icon(Icons.home),
-              title: Text('Home'),
-              onTap: () {
-                Navigator.pushReplacement(
-                  context,
-                  MaterialPageRoute(builder: (context) => MyHomePage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.info),
-              title: Text('About'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => AboutPage()),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.settings_outlined),
-              title: Text('Settings'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => SettingsPage()),
-                );
-              },
-            ),
-            if (user != null)
-              Column(
-                children: [
-                  Divider(),
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => ProfilePage(user!)),
-                      );
-                    },
-                    child: ListTile(
-                      leading: Icon(Icons.person),
-                      title: Text('Profile'),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      Icons.person,
+                      color: Colors.white,
+                      size: 24,
+                    ),
+                    SizedBox(width: 8),
+                    Text(
+                      user != null ? user!.displayName ?? '' : '',
+                      style: GoogleFonts.poppins(
+                        textStyle: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                if (user != null)
+                  Text(
+                    user!.email ?? '',
+                    style: GoogleFonts.poppins(
+                      textStyle: TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
-                  ListTile(
-                    leading: Icon(Icons.logout),
-                    title: Text('Logout'),
-                    onTap: () => _logout(context),
-                  ),
-                ],
-              ),
-          ],
-        ),
+              ],
+            ),
+          ),
+          ListTile(
+            leading: Icon(Icons.person),
+            title: Text(
+              'Profile',
+              style: GoogleFonts.poppins(),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => ProfilePage(user!)),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text(
+              'Settings',
+              style: GoogleFonts.poppins(),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => SettingsPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.info),
+            title: Text(
+              'About',
+              style: GoogleFonts.poppins(),
+            ),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AboutPage()),
+              );
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.logout),
+            title: Text(
+              'Logout',
+              style: GoogleFonts.poppins(),
+            ),
+            onTap: () => _logout(context),
+          ),
+        ],
       ),
     );
   }

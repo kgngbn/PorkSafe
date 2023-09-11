@@ -41,6 +41,16 @@ class ProfilePage extends StatelessWidget {
               'Email: ${user.email}',
               style: GoogleFonts.poppins(fontSize: 18),
             ),
+            SizedBox(height: 10),
+            Text(
+              'Name: ${user.displayName}',
+              style: GoogleFonts.poppins(fontSize: 18),
+            ),
+            SizedBox(height: 10),
+            Text(
+              'Location: ${user.photoURL}',
+              style: GoogleFonts.poppins(fontSize: 18),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
@@ -57,6 +67,24 @@ class ProfilePage extends StatelessWidget {
               ),
               child: Text(
                 'Change Password',
+                style: GoogleFonts.poppins(),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => UpdateProfileScreen(user),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF5347D9),
+                onPrimary: Colors.white, // Set the foreground color
+              ),
+              child: Text(
+                'Update Profile',
                 style: GoogleFonts.poppins(),
               ),
             ),
@@ -188,6 +216,131 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               ),
               child: Text(
                 'Update Password',
+                style: GoogleFonts.poppins(),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class UpdateProfileScreen extends StatefulWidget {
+  final User user;
+
+  UpdateProfileScreen(this.user);
+
+  @override
+  _UpdateProfileScreenState createState() => _UpdateProfileScreenState();
+}
+
+class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
+  late String newName;
+  late String newLocation;
+  final _nameController = TextEditingController();
+  final _locationController = TextEditingController();
+
+  void updateProfile(BuildContext context) async {
+    try {
+      // Update the user's display name and photo URL
+      await widget.user.updateProfile(
+        displayName: newName,
+        photoURL: newLocation,
+      );
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Profile updated successfully.'),
+          backgroundColor: Colors.green,
+        ),
+      );
+
+      // Clear the input fields
+      _nameController.clear();
+      _locationController.clear();
+    } catch (error) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to update profile.'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    newName = widget.user.displayName ?? '';
+    newLocation = widget.user.photoURL ?? '';
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _locationController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Update Profile',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        backgroundColor: Color(0xFFEC615A),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      ),
+      body: Padding(
+        padding: EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextFormField(
+              controller: _nameController,
+              onChanged: (value) {
+                setState(() {
+                  newName = value;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'New Name',
+              ),
+            ),
+            SizedBox(height: 20),
+            TextFormField(
+              controller: _locationController,
+              onChanged: (value) {
+                setState(() {
+                  newLocation = value;
+                });
+              },
+              decoration: InputDecoration(
+                labelText: 'New Location',
+              ),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () {
+                updateProfile(context);
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Color(0xFF5347D9),
+                onPrimary: Colors.white, // Set the foreground color
+              ),
+              child: Text(
+                'Update Profile',
                 style: GoogleFonts.poppins(),
               ),
             ),

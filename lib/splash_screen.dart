@@ -1,10 +1,9 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_layout/image_picker.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'image_picker.dart';
 import 'login_screen.dart';
-import 'app_drawer.dart'; // Import the modified AppDrawer class
 
 class SplashScreen extends StatefulWidget {
   @override
@@ -42,8 +41,6 @@ class _SplashScreenState extends State<SplashScreen>
     return Material(
       child: Scaffold(
         backgroundColor: Color(0xFFFFFAE9),
-        drawer: AppDrawer(
-            null), // Pass null as user since the user is not logged in
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,

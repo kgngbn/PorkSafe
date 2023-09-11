@@ -38,6 +38,9 @@ dependencies:
   cached_network_image: ^3.2.3
   tflite_flutter: ^0.10.1
   firebase_auth: ^4.6.2
+  shared_preferences: ^2.1.2
+  geolocator: ^9.0.2
+  geocoding: ^2.1.0
 
 dev_dependencies:
   flutter_test:

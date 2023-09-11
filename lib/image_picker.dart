@@ -1,18 +1,22 @@
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_layout/profile_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:tflite/tflite.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
 import 'app_drawer.dart';
+import 'login_screen.dart';
 
 File? _imageFile;
 List<dynamic>? _recognitions;
 
 class MyHomePage extends StatefulWidget {
-  final User? user; // Add a user field to the MyHomePage widget
+  final User? user;
 
-  MyHomePage({this.user}); // Modify the constructor to accept the user
+  MyHomePage({required this.user});
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -20,7 +24,7 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   bool _isLoading = false;
-  bool _isModelBusy = false; // Flag to track interpreter busy state
+  bool _isModelBusy = false;
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().getImage(source: source);
@@ -34,21 +38,21 @@ class _MyHomePageState extends State<MyHomePage> {
       return;
     }
 
-    if (_isModelBusy) return; // Exit early if model is busy
+    if (_isModelBusy) return;
 
     setState(() {
       _isLoading = true;
     });
 
     try {
-      _isModelBusy = true; // Set the model as busy
+      _isModelBusy = true;
 
       var recognitions = await Tflite.runModelOnImage(
         path: _imageFile!.path,
-        imageMean: 0.0, // defaults to 117.0
-        imageStd: 255.0, // defaults to 1.0
-        numResults: 2, // Set the number of results to 2
-        threshold: 0.2, // defaults to 0.1
+        imageMean: 0.0,
+        imageStd: 255.0,
+        numResults: 2,
+        threshold: 0.2,
         asynch: true,
       );
 
@@ -84,15 +88,75 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 
       if (result == 'Spoiled') {
+        List<String> selectedDescriptions = [];
+
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Spoiled Pork Detected!!!'),
-              content: Text('Please report this to the authorities.'),
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Text('Check the appropriate description based on your pork:'),
+                  CheckboxListTile(
+                    title: Text('Unpleasant odor | Foul Smell'),
+                    value: selectedDescriptions
+                        .contains('Unpleasant odor | Fould Smell'),
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        if (value) {
+                          selectedDescriptions.add('Unpleasant odor');
+                        } else {
+                          selectedDescriptions.remove('Unpleasant odor');
+                        }
+                      }
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: Text('Strange color | Discoloration'),
+                    value: selectedDescriptions
+                        .contains('Strange color | Discoloration'),
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        if (value) {
+                          selectedDescriptions.add('Strange color');
+                        } else {
+                          selectedDescriptions.remove('Strange color');
+                        }
+                      }
+                    },
+                  ),
+                  CheckboxListTile(
+                    title: Text('Slimy Texture'),
+                    value: selectedDescriptions.contains('Slimy Texture'),
+                    onChanged: (bool? value) {
+                      if (value != null) {
+                        if (value) {
+                          selectedDescriptions.add('Slimy Texture');
+                        } else {
+                          selectedDescriptions.remove('Slimy Texture');
+                        }
+                      }
+                    },
+                  ),
+                  Text(
+                    'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
+                    style: TextStyle(color: Colors.red),
+                  ),
+                ],
+              ),
               actions: [
                 TextButton(
                   onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel'),
+                ),
+                TextButton(
+                  onPressed: () {
+                    // Process the selected descriptions here
+                    print('Selected descriptions: $selectedDescriptions');
                     Navigator.of(context).pop();
                   },
                   child: Text('OK'),
@@ -105,7 +169,7 @@ class _MyHomePageState extends State<MyHomePage> {
     } catch (e) {
       print('Error classifying image: $e');
     } finally {
-      _isModelBusy = false; // Set the model as not busy
+      _isModelBusy = false;
       setState(() {
         _isLoading = false;
       });
@@ -131,6 +195,25 @@ class _MyHomePageState extends State<MyHomePage> {
     super.dispose();
   }
 
+  void logout(BuildContext context) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.clear();
+    FirebaseAuth.instance.signOut();
+    Navigator.pushAndRemoveUntil(
+      context,
+      MaterialPageRoute(builder: (BuildContext context) => LoginScreen()),
+      (route) => false,
+    );
+  }
+
+  void goToProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+          builder: (context) => UpdateProfileScreen(widget.user!)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,7 +228,10 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: <Widget>[
           Padding(
             padding: const EdgeInsets.all(10.0),
-            child: Icon(Icons.edit),
+            child: IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () => logout(context),
+            ),
           ),
         ],
       ),
@@ -227,7 +313,7 @@ class _MyHomePageState extends State<MyHomePage> {
           ),
         ],
       ),
-      drawer: AppDrawer(widget.user),
+      drawer: AppDrawer(widget.user, onProfileSelected: goToProfile),
     );
   }
 }
