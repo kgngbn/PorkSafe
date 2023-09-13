@@ -25,6 +25,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _isLoading = false;
   bool _isModelBusy = false;
+  List<String> selectedDescriptions = [];
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().getImage(source: source);
@@ -88,8 +89,6 @@ class _MyHomePageState extends State<MyHomePage> {
       );
 
       if (result == 'Spoiled') {
-        List<String> selectedDescriptions = [];
-
         showDialog(
           context: context,
           builder: (BuildContext context) {
@@ -101,29 +100,31 @@ class _MyHomePageState extends State<MyHomePage> {
                   Text('Check the appropriate description based on your pork:'),
                   CheckboxListTile(
                     title: Text('Unpleasant odor | Foul Smell'),
-                    value: selectedDescriptions
-                        .contains('Unpleasant odor | Fould Smell'),
+                    value: selectedDescriptions.contains('Unpleasant odor'),
                     onChanged: (bool? value) {
                       if (value != null) {
-                        if (value) {
-                          selectedDescriptions.add('Unpleasant odor');
-                        } else {
-                          selectedDescriptions.remove('Unpleasant odor');
-                        }
+                        setState(() {
+                          if (value) {
+                            selectedDescriptions.add('Unpleasant odor');
+                          } else {
+                            selectedDescriptions.remove('Unpleasant odor');
+                          }
+                        });
                       }
                     },
                   ),
                   CheckboxListTile(
                     title: Text('Strange color | Discoloration'),
-                    value: selectedDescriptions
-                        .contains('Strange color | Discoloration'),
+                    value: selectedDescriptions.contains('Strange color'),
                     onChanged: (bool? value) {
                       if (value != null) {
-                        if (value) {
-                          selectedDescriptions.add('Strange color');
-                        } else {
-                          selectedDescriptions.remove('Strange color');
-                        }
+                        setState(() {
+                          if (value) {
+                            selectedDescriptions.add('Strange color');
+                          } else {
+                            selectedDescriptions.remove('Strange color');
+                          }
+                        });
                       }
                     },
                   ),
@@ -132,11 +133,13 @@ class _MyHomePageState extends State<MyHomePage> {
                     value: selectedDescriptions.contains('Slimy Texture'),
                     onChanged: (bool? value) {
                       if (value != null) {
-                        if (value) {
-                          selectedDescriptions.add('Slimy Texture');
-                        } else {
-                          selectedDescriptions.remove('Slimy Texture');
-                        }
+                        setState(() {
+                          if (value) {
+                            selectedDescriptions.add('Slimy Texture');
+                          } else {
+                            selectedDescriptions.remove('Slimy Texture');
+                          }
+                        });
                       }
                     },
                   ),
@@ -156,7 +159,12 @@ class _MyHomePageState extends State<MyHomePage> {
                 TextButton(
                   onPressed: () {
                     // Process the selected descriptions here
-                    print('Selected descriptions: $selectedDescriptions');
+                    if (selectedDescriptions.isNotEmpty) {
+                      String descriptionMessage =
+                          'The following issues were detected: ${selectedDescriptions.join(', ')}';
+                      print(descriptionMessage);
+                      // You can use descriptionMessage as needed.
+                    }
                     Navigator.of(context).pop();
                   },
                   child: Text('OK'),
