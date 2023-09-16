@@ -143,6 +143,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       }
                     },
                   ),
+                  TextField(
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintText:
+                          'Enter more details that you have noticed on your pork',
+                    ),
+                  ),
                   Text(
                     'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
                     style: TextStyle(color: Colors.red),
@@ -167,7 +174,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     }
                     Navigator.of(context).pop();
                   },
-                  child: Text('OK'),
+                  child: Text('Send Report'),
                 ),
               ],
             );
