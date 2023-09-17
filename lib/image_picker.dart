@@ -11,9 +11,6 @@ import 'app_drawer.dart';
 import 'login_screen.dart';
 import 'spoiled_info.dart';
 
-File? _imageFile;
-List<dynamic>? _recognitions;
-
 class MyHomePage extends StatefulWidget {
   final User? user;
 
@@ -24,6 +21,7 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  File? _imageFile;
   bool _isLoading = false;
   bool _isModelBusy = false;
   String _classificationResult = 'Unknown';
@@ -101,11 +99,12 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: <Widget>[
                     ElevatedButton(
                       onPressed: () {
+                        Navigator.of(context).pop(); // Close the current dialog
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => SpoiledPorkInfoPage(
                               result: _classificationResult,
-                              imageFile: _imageFile,
+                              imageFile: _imageFile, // Pass the image file
                             ),
                           ),
                         );
@@ -183,102 +182,119 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFFFFAE9),
-      appBar: AppBar(
-        backgroundColor: Color(0xFFEC615A),
-        title: Text(
-          'PorkSafe',
-          style: GoogleFonts.poppins(
-              fontSize: 20, color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        actions: <Widget>[
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: IconButton(
-              icon: Icon(Icons.logout),
-              onPressed: () => logout(context),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.all(0.5),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _imageFile != null
-                      ? Image.file(
-                          _imageFile!,
-                          width: 300,
-                          height: 300,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          'assets/logo.png',
-                          height: 200,
-                          fit: BoxFit.contain,
-                        ),
-                  SizedBox(height: 10),
-                  Text(
-                    'Scan Pork to Detect Spoilage or Freshness',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: () {
-                      _pickImage(ImageSource.gallery);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFF5347D9),
-                      textStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                      ),
-                    ),
-                    child: Text('Select from gallery'),
-                  ),
-                  SizedBox(height: 10),
-                  ElevatedButton(
-                    onPressed: () {
-                      _pickImage(ImageSource.camera);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFF5347D9),
-                      textStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                      ),
-                    ),
-                    child: Text('Take a photo'),
-                  ),
-                  SizedBox(height: 20),
-                  ElevatedButton(
-                    onPressed: _isLoading ? null : _classifyImage,
-                    style: ElevatedButton.styleFrom(
-                      foregroundColor: Colors.white,
-                      backgroundColor: Color(0xFF5347D9),
-                      textStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                      ),
-                    ),
-                    child: _isLoading
-                        ? CircularProgressIndicator()
-                        : Text('Classify Image'),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+      appBar: buildAppBar(context),
+      body: buildBody(),
       drawer: AppDrawer(widget.user, onProfileSelected: goToProfile),
+    );
+  }
+
+  AppBar buildAppBar(BuildContext context) {
+    return AppBar(
+      backgroundColor: Color(0xFFEC615A),
+      title: Text(
+        'PorkSafe',
+        style: GoogleFonts.poppins(
+          fontSize: 20,
+          color: Colors.white,
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      actions: <Widget>[
+        buildLogoutButton(context),
+      ],
+    );
+  }
+
+  Widget buildLogoutButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(10.0),
+      child: IconButton(
+        icon: Icon(Icons.logout),
+        onPressed: () => logout(context),
+      ),
+    );
+  }
+
+  Widget buildBody() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(0.5),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                buildImage(),
+                SizedBox(height: 10),
+                buildScanText(),
+                SizedBox(height: 20),
+                buildImageButton("Select from gallery", ImageSource.gallery),
+                SizedBox(height: 10),
+                buildImageButton("Take a photo", ImageSource.camera),
+                SizedBox(height: 20),
+                buildClassifyButton(),
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget buildImage() {
+    return _imageFile != null
+        ? Image.file(
+            _imageFile!,
+            width: 300,
+            height: 300,
+            fit: BoxFit.cover,
+          )
+        : Image.asset(
+            'assets/logo.png',
+            height: 200,
+            fit: BoxFit.contain,
+          );
+  }
+
+  Widget buildScanText() {
+    return Text(
+      'Scan Pork to Detect Spoilage or Freshness',
+      textAlign: TextAlign.center,
+      style: GoogleFonts.poppins(
+        fontSize: 20,
+        fontWeight: FontWeight.bold,
+      ),
+    );
+  }
+
+  Widget buildImageButton(String text, ImageSource source) {
+    return ElevatedButton(
+      onPressed: () {
+        _pickImage(source);
+      },
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: Color(0xFF5347D9),
+        textStyle: GoogleFonts.poppins(
+          fontSize: 14,
+        ),
+      ),
+      child: Text(text),
+    );
+  }
+
+  Widget buildClassifyButton() {
+    return ElevatedButton(
+      onPressed: _isLoading ? null : _classifyImage,
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: Color(0xFF5347D9),
+        textStyle: GoogleFonts.poppins(
+          fontSize: 14,
+        ),
+      ),
+      child: _isLoading ? CircularProgressIndicator() : Text('Classify Image'),
     );
   }
 }
