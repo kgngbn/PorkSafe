@@ -9,6 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app_drawer.dart';
 import 'login_screen.dart';
+import 'spoiled_info.dart';
 
 File? _imageFile;
 List<dynamic>? _recognitions;
@@ -25,7 +26,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   bool _isLoading = false;
   bool _isModelBusy = false;
-  List<String> selectedDescriptions = [];
+  String _classificationResult = 'Unknown';
 
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().getImage(source: source);
@@ -57,10 +58,10 @@ class _MyHomePageState extends State<MyHomePage> {
         asynch: true,
       );
 
-      String result = 'Unknown';
+      _classificationResult = 'Unknown';
 
       if (recognitions != null && recognitions.isNotEmpty) {
-        result = recognitions[0]['label'];
+        _classificationResult = recognitions[0]['label'];
       }
 
       showDialog(
@@ -68,7 +69,7 @@ class _MyHomePageState extends State<MyHomePage> {
         builder: (BuildContext context) {
           return AlertDialog(
             title: Text('Classification Result'),
-            content: Text('The pork is $result.'),
+            content: Text('The pork is $_classificationResult.'),
             actions: [
               TextButton(
                 onPressed: () {
@@ -88,73 +89,35 @@ class _MyHomePageState extends State<MyHomePage> {
         },
       );
 
-      if (result == 'Spoiled') {
+      if (_classificationResult == 'Spoiled') {
         showDialog(
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
               title: Text('Spoiled Pork Detected!!!'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Text('Check the appropriate description based on your pork:'),
-                  CheckboxListTile(
-                    title: Text('Unpleasant odor | Foul Smell'),
-                    value: selectedDescriptions.contains('Unpleasant odor'),
-                    onChanged: (bool? value) {
-                      if (value != null) {
-                        setState(() {
-                          if (value) {
-                            selectedDescriptions.add('Unpleasant odor');
-                          } else {
-                            selectedDescriptions.remove('Unpleasant odor');
-                          }
-                        });
-                      }
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: Text('Strange color | Discoloration'),
-                    value: selectedDescriptions.contains('Strange color'),
-                    onChanged: (bool? value) {
-                      if (value != null) {
-                        setState(() {
-                          if (value) {
-                            selectedDescriptions.add('Strange color');
-                          } else {
-                            selectedDescriptions.remove('Strange color');
-                          }
-                        });
-                      }
-                    },
-                  ),
-                  CheckboxListTile(
-                    title: Text('Slimy Texture'),
-                    value: selectedDescriptions.contains('Slimy Texture'),
-                    onChanged: (bool? value) {
-                      if (value != null) {
-                        setState(() {
-                          if (value) {
-                            selectedDescriptions.add('Slimy Texture');
-                          } else {
-                            selectedDescriptions.remove('Slimy Texture');
-                          }
-                        });
-                      }
-                    },
-                  ),
-                  TextField(
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText:
-                          'Enter more details that you have noticed on your pork',
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ElevatedButton(
+                      onPressed: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => SpoiledPorkInfoPage(
+                              result: _classificationResult,
+                              imageFile: _imageFile,
+                            ),
+                          ),
+                        );
+                      },
+                      child: Text('Provide Additional Info'),
                     ),
-                  ),
-                  Text(
-                    'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
-                    style: TextStyle(color: Colors.red),
-                  ),
-                ],
+                    Text(
+                      'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
+                      style: TextStyle(color: Colors.red),
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
@@ -162,19 +125,6 @@ class _MyHomePageState extends State<MyHomePage> {
                     Navigator.of(context).pop();
                   },
                   child: Text('Cancel'),
-                ),
-                TextButton(
-                  onPressed: () {
-                    // Process the selected descriptions here
-                    if (selectedDescriptions.isNotEmpty) {
-                      String descriptionMessage =
-                          'The following issues were detected: ${selectedDescriptions.join(', ')}';
-                      print(descriptionMessage);
-                      // You can use descriptionMessage as needed.
-                    }
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Send Report'),
                 ),
               ],
             );
