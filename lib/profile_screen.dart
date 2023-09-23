@@ -1,16 +1,23 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:flutter_google_places/flutter_google_places.dart';
+import 'package:google_maps_webservice/places.dart' as places;
 
-class ProfilePage extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   final User user;
+  final String? newLocation;
 
-  ProfilePage(this.user);
+  ProfileScreen(this.user, {this.newLocation});
 
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xFFFFFAE9), // Set the background color
       appBar: AppBar(
         title: Text(
           'Profile',
@@ -29,197 +36,62 @@ class ProfilePage extends StatelessWidget {
         ),
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.person,
-              size: 100,
-            ),
-            SizedBox(height: 20),
-            Text(
-              'Email: ${user.email}',
-              style: GoogleFonts.poppins(fontSize: 18),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Name: ${user.displayName}',
-              style: GoogleFonts.poppins(fontSize: 18),
-            ),
-            SizedBox(height: 10),
-            Text(
-              'Location: ${user.photoURL}',
-              style: GoogleFonts.poppins(fontSize: 18),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => ChangePasswordScreen(user),
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                CircleAvatar(
+                  radius: 50.0,
+                  backgroundColor:
+                      Colors.blue, // Set your desired background color
+                  child: Icon(
+                    Icons.person, // Use any icon you prefer
+                    size: 50.0,
+                    color: Colors.white, // Set the icon color
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Color(0xFF5347D9),
-                onPrimary: Colors.white, // Set the foreground color
-              ),
-              child: Text(
-                'Change Password',
-                style: GoogleFonts.poppins(),
-              ),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => UpdateProfileScreen(user),
+                ),
+                SizedBox(height: 20),
+                ListTile(
+                  title: Text(
+                    'Name: ${widget.user.displayName}',
+                    style: GoogleFonts.poppins(),
                   ),
-                );
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Color(0xFF5347D9),
-                onPrimary: Colors.white, // Set the foreground color
-              ),
-              child: Text(
-                'Update Profile',
-                style: GoogleFonts.poppins(),
-              ),
+                ),
+                ListTile(
+                  title: Text(
+                    'Email: ${widget.user.email}',
+                    style: GoogleFonts.poppins(),
+                  ),
+                ),
+                ListTile(
+                  title: Text(
+                    'Location: ${widget.newLocation ?? ''}', // Display the actual location here
+                    style: GoogleFonts.poppins(),
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => UpdateProfileScreen(widget.user),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    primary: Color(0xFF5347D9),
+                    onPrimary: Colors.white,
+                  ),
+                  child: Text(
+                    'Edit Profile',
+                    style: GoogleFonts.poppins(),
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class ChangePasswordScreen extends StatefulWidget {
-  final User user;
-
-  ChangePasswordScreen(this.user);
-
-  @override
-  _ChangePasswordScreenState createState() => _ChangePasswordScreenState();
-}
-
-class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
-  late String currentPassword; // Make it non-nullable
-  late String newPassword; // Make it non-nullable
-  final _currentPasswordController = TextEditingController();
-  final _newPasswordController = TextEditingController();
-
-  void changePassword(BuildContext context) async {
-    try {
-      // Reauthenticate the user with the current password
-      AuthCredential credential = EmailAuthProvider.credential(
-        email: widget.user.email!,
-        password: currentPassword,
-      );
-      await widget.user.reauthenticateWithCredential(credential);
-
-      // Update the password with the new password
-      await widget.user.updatePassword(newPassword);
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Password updated successfully.'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      // Clear the password fields
-      _currentPasswordController.clear();
-      _newPasswordController.clear();
-    } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to update password.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    currentPassword = '';
-    newPassword = '';
-  }
-
-  @override
-  void dispose() {
-    _currentPasswordController.dispose();
-    _newPasswordController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Change Password',
-          style: GoogleFonts.poppins(
-            fontSize: 20,
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
           ),
-        ),
-        backgroundColor: Color(0xFFEC615A),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-      ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _currentPasswordController,
-              obscureText: true,
-              onChanged: (value) {
-                setState(() {
-                  currentPassword = value;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'Current Password',
-              ),
-            ),
-            SizedBox(height: 20),
-            TextFormField(
-              controller: _newPasswordController,
-              obscureText: true,
-              onChanged: (value) {
-                setState(() {
-                  newPassword = value;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'New Password',
-              ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                changePassword(context);
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Color(0xFF5347D9),
-                onPrimary: Colors.white, // Set the foreground color
-              ),
-              child: Text(
-                'Update Password',
-                style: GoogleFonts.poppins(),
-              ),
-            ),
-          ],
         ),
       ),
     );
@@ -269,6 +141,29 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
     }
   }
 
+  Future<void> selectLocation(BuildContext context) async {
+    places.Prediction? prediction = await PlacesAutocomplete.show(
+      context: context,
+      apiKey:
+          'AIzaSyAiS_L_hUXgmMJkIMgymJ0r8DAp0nvNHaw', // Replace with your Google Maps API key
+      language: 'en',
+      components: [places.Component(places.Component.country, 'US')],
+    );
+
+    if (prediction != null) {
+      // Extract the selected place details
+      places.PlacesDetailsResponse placeDetails = await places.GoogleMapsPlaces(
+              apiKey: 'AIzaSyAiS_L_hUXgmMJkIMgymJ0r8DAp0nvNHaw')
+          .getDetailsByPlaceId(prediction.placeId ?? '');
+      String selectedLocation = placeDetails.result.formattedAddress ?? '';
+
+      setState(() {
+        newLocation = selectedLocation;
+        _locationController.text = selectedLocation;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -303,48 +198,67 @@ class _UpdateProfileScreenState extends State<UpdateProfileScreen> {
           },
         ),
       ),
-      body: Padding(
-        padding: EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextFormField(
-              controller: _nameController,
-              onChanged: (value) {
-                setState(() {
-                  newName = value;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'New Name',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              TextFormField(
+                controller: _nameController,
+                onChanged: (value) {
+                  setState(() {
+                    newName = value;
+                  });
+                },
+                decoration: InputDecoration(
+                  labelText: 'New Name',
+                ),
               ),
-            ),
-            SizedBox(height: 20),
-            TextFormField(
-              controller: _locationController,
-              onChanged: (value) {
-                setState(() {
-                  newLocation = value;
-                });
-              },
-              decoration: InputDecoration(
-                labelText: 'New Location',
+              SizedBox(height: 20),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    flex: 3,
+                    child: TextFormField(
+                      controller: _locationController,
+                      onChanged: (value) {
+                        setState(() {
+                          newLocation = value;
+                        });
+                      },
+                      decoration: InputDecoration(
+                        labelText: 'New Location',
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    flex: 1,
+                    child: IconButton(
+                      icon: Icon(Icons.location_on),
+                      onPressed: () {
+                        selectLocation(context);
+                      },
+                    ),
+                  ),
+                ],
               ),
-            ),
-            SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                updateProfile(context);
-              },
-              style: ElevatedButton.styleFrom(
-                primary: Color(0xFF5347D9),
-                onPrimary: Colors.white, // Set the foreground color
+              SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  updateProfile(context);
+                },
+                style: ElevatedButton.styleFrom(
+                  primary: Color(0xFF5347D9),
+                  onPrimary: Colors.white,
+                ),
+                child: Text(
+                  'Update Profile',
+                  style: GoogleFonts.poppins(),
+                ),
               ),
-              child: Text(
-                'Update Profile',
-                style: GoogleFonts.poppins(),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

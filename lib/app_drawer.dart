@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_layout/profile_screen.dart';
+import 'package:flutter_layout/profile_screen.dart'; // Import the profile screen
 import 'package:flutter_layout/settings.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'about.dart';
@@ -78,7 +78,9 @@ class AppDrawer extends StatelessWidget {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => ProfilePage(user!)),
+                MaterialPageRoute(
+                    builder: (context) => ProfileScreen(
+                        user!)), // Pass the user to the ProfilePage
               );
             },
           ),

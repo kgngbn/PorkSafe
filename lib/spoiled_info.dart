@@ -3,12 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class SpoiledPorkInfoPage extends StatefulWidget {
+  final User? user;
   final String result;
   final File? imageFile;
 
-  SpoiledPorkInfoPage({required this.result, this.imageFile});
+  SpoiledPorkInfoPage({
+    required this.result,
+    this.user,
+    this.imageFile,
+  });
 
   @override
   _SpoiledPorkInfoPageState createState() => _SpoiledPorkInfoPageState();
@@ -51,26 +59,46 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
   void _submitInfoToFirebase() async {
     String additionalInfo = _descriptionController.text;
 
-    try {
-      final imageUrl = await _uploadImageToStorage(widget.imageFile!);
+    // Request location permission
+    final PermissionStatus permissionStatus =
+        await Permission.location.request();
 
-      await _firebaseService.saveAdditionalInfo(
-        additionalInfo,
-        widget.result,
-        foulSmellChecked,
-        slimyTextureChecked,
-        discolorationChecked,
-        imageUrl,
-      );
+    if (permissionStatus.isGranted) {
+      try {
+        final imageUrl = await _uploadImageToStorage(widget.imageFile!);
 
-      setState(() {
-        reportSent = true;
-      });
-    } catch (error) {
-      print('Error saving data: $error');
-      setState(() {
-        reportSent = false;
-      });
+        // Get the user's current location
+        Position position = await Geolocator.getCurrentPosition(
+          desiredAccuracy: LocationAccuracy.high,
+        );
+
+        // Save the user's location along with other data
+        await _firebaseService.saveAdditionalInfo(
+          additionalInfo,
+          widget.result,
+          foulSmellChecked,
+          slimyTextureChecked,
+          discolorationChecked,
+          imageUrl,
+          widget.user?.displayName ?? '',
+          widget.user?.email ?? '',
+          position.latitude,
+          position.longitude,
+        );
+
+        setState(() {
+          reportSent = true;
+        });
+      } catch (error) {
+        print('Error saving data: $error');
+        setState(() {
+          reportSent = false;
+        });
+      }
+    } else {
+      // Handle permission denied
+      print('Location permission denied');
+      // You can display a message or take appropriate action here
     }
   }
 
@@ -229,12 +257,17 @@ class FirebaseService {
       FirebaseFirestore.instance.collection('spoiled_pork_info');
 
   Future<void> saveAdditionalInfo(
-      String additionalInfo,
-      String result,
-      bool foulSmellChecked,
-      bool slimyTextureChecked,
-      bool discolorationChecked,
-      String? imageUrl) async {
+    String additionalInfo,
+    String result,
+    bool foulSmellChecked,
+    bool slimyTextureChecked,
+    bool discolorationChecked,
+    String? imageUrl,
+    String displayName,
+    String email,
+    double latitude,
+    double longitude,
+  ) async {
     try {
       await _spoiledPorkCollection.add({
         "additionalInfo": additionalInfo,
@@ -243,6 +276,10 @@ class FirebaseService {
         "discolorationChecked": discolorationChecked,
         "classificationResult": result,
         "imageUrl": imageUrl,
+        "displayName": displayName,
+        "email": email,
+        "latitude": latitude,
+        "longitude": longitude,
       });
     } catch (error) {
       print('Error saving data: $error');

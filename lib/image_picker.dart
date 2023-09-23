@@ -103,6 +103,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (context) => SpoiledPorkInfoPage(
+                              user: widget.user!,
                               result: _classificationResult,
                               imageFile: _imageFile, // Pass the image file
                             ),

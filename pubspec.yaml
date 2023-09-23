@@ -39,9 +39,12 @@ dependencies:
   tflite_flutter: ^0.10.1
   firebase_auth: ^4.6.2
   shared_preferences: ^2.1.2
-  geolocator: ^9.0.2
+  geolocator: ^10.1.0
   geocoding: ^2.1.0
   firebase_database: ^10.2.5
+  flutter_google_places: ^0.3.0
+  google_maps_flutter: ^2.5.0
+  permission_handler: ^11.0.0
 
 dev_dependencies:
   flutter_test:
