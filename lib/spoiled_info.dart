@@ -2,12 +2,13 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 
 class SpoiledPorkInfoPage extends StatefulWidget {
   final String result;
-  final File? imageFile; // Add this line
+  final File? imageFile;
 
-  SpoiledPorkInfoPage({required this.result, this.imageFile}); // Add this line
+  SpoiledPorkInfoPage({required this.result, this.imageFile});
 
   @override
   _SpoiledPorkInfoPageState createState() => _SpoiledPorkInfoPageState();
@@ -18,7 +19,7 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
   bool foulSmellChecked = false;
   bool slimyTextureChecked = false;
   bool discolorationChecked = false;
-  bool? reportSent; // Initialize as null
+  bool? reportSent;
 
   final FirebaseService _firebaseService = FirebaseService();
 
@@ -28,23 +29,44 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
     super.dispose();
   }
 
+  Future<String?> _uploadImageToStorage(File imageFile) async {
+    try {
+      final firebase_storage.Reference storageRef =
+          firebase_storage.FirebaseStorage.instance.ref();
+
+      final imageFileName =
+          'images/${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final uploadTask = storageRef.child(imageFileName).putFile(imageFile);
+
+      final snapshot = await uploadTask;
+      final downloadURL = await snapshot.ref.getDownloadURL();
+
+      return downloadURL;
+    } catch (error) {
+      print('Error uploading image: $error');
+      return null;
+    }
+  }
+
   void _submitInfoToFirebase() async {
     String additionalInfo = _descriptionController.text;
 
     try {
+      final imageUrl = await _uploadImageToStorage(widget.imageFile!);
+
       await _firebaseService.saveAdditionalInfo(
         additionalInfo,
         widget.result,
         foulSmellChecked,
         slimyTextureChecked,
         discolorationChecked,
+        imageUrl,
       );
-      // Report sent successfully
+
       setState(() {
         reportSent = true;
       });
     } catch (error) {
-      // Report failed to send
       print('Error saving data: $error');
       setState(() {
         reportSent = false;
@@ -66,14 +88,12 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
         backgroundColor: Color(0xFFEC615A),
       ),
       body: Center(
-        // Center the content
         child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center, // Center vertically
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Display the classification result
                 Text(
                   'Classification Result: ${widget.result}',
                   style: GoogleFonts.poppins(
@@ -94,16 +114,16 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
                     color: Colors.black,
                   ),
                 ),
-                if (widget.imageFile != null) // Display the chosen image
+                if (widget.imageFile != null)
                   Image.file(
                     widget.imageFile!,
                     width: 300,
                     height: 300,
                     fit: BoxFit.cover,
                   )
-                else // Display a default image if no image is chosen
+                else
                   Image.asset(
-                    'assets/default_image.png', // Provide a default image asset path
+                    'assets/default_image.png',
                     width: 300,
                     height: 300,
                     fit: BoxFit.cover,
@@ -213,7 +233,8 @@ class FirebaseService {
       String result,
       bool foulSmellChecked,
       bool slimyTextureChecked,
-      bool discolorationChecked) async {
+      bool discolorationChecked,
+      String? imageUrl) async {
     try {
       await _spoiledPorkCollection.add({
         "additionalInfo": additionalInfo,
@@ -221,10 +242,11 @@ class FirebaseService {
         "slimyTextureChecked": slimyTextureChecked,
         "discolorationChecked": discolorationChecked,
         "classificationResult": result,
+        "imageUrl": imageUrl,
       });
     } catch (error) {
       print('Error saving data: $error');
-      throw error; // Propagate the error to handle it in the UI
+      throw error;
     }
   }
 }
