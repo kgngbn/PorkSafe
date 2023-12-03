@@ -230,9 +230,11 @@ class _MyHomePageState extends State<MyHomePage> {
                 SizedBox(height: 10),
                 buildScanText(),
                 SizedBox(height: 20),
-                buildImageButton("Select from gallery", ImageSource.gallery),
+                buildImageButton(
+                    "Select from gallery", ImageSource.gallery, Icons.image),
                 SizedBox(height: 10),
-                buildImageButton("Take a photo", ImageSource.camera),
+                buildImageButton(
+                    "Take a photo", ImageSource.camera, Icons.camera_alt),
                 SizedBox(height: 20),
                 buildClassifyButton(),
               ],
@@ -269,19 +271,30 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  Widget buildImageButton(String text, ImageSource source) {
-    return ElevatedButton(
-      onPressed: () {
-        _pickImage(source);
-      },
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: Color(0xFF5347D9),
-        textStyle: GoogleFonts.poppins(
-          fontSize: 14,
+  Widget buildImageButton(String text, ImageSource source, IconData iconData) {
+    return ConstrainedBox(
+      constraints:
+          BoxConstraints(maxWidth: 200), // Set the maximum width as needed
+      child: ElevatedButton(
+        onPressed: () {
+          _pickImage(source);
+        },
+        style: ElevatedButton.styleFrom(
+          foregroundColor: Colors.white,
+          backgroundColor: Color(0xFF5347D9),
+          textStyle: GoogleFonts.poppins(
+            fontSize: 14,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(iconData),
+            SizedBox(width: 8),
+            Text(text),
+          ],
         ),
       ),
-      child: Text(text),
     );
   }
 

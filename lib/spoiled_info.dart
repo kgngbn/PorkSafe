@@ -26,14 +26,19 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
   TextEditingController _descriptionController = TextEditingController();
   bool foulSmellChecked = false;
   bool slimyTextureChecked = false;
-  bool discolorationChecked = false;
   bool? reportSent;
+
+  // New fields for choices
+  bool frozenChecked = false;
+  bool indoorChecked = false;
+  TextEditingController _locationNameController = TextEditingController();
 
   final FirebaseService _firebaseService = FirebaseService();
 
   @override
   void dispose() {
     _descriptionController.dispose();
+    _locationNameController.dispose();
     super.dispose();
   }
 
@@ -78,7 +83,8 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
           widget.result,
           foulSmellChecked,
           slimyTextureChecked,
-          discolorationChecked,
+          frozenChecked,
+          indoorChecked,
           imageUrl,
           widget.user?.displayName ?? '',
           widget.user?.email ?? '',
@@ -191,16 +197,31 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
                       ),
                       CheckboxListTile(
                         title: Text(
-                          'Discoloration (light pink is recommended for fresh pork)',
+                          'Frozen',
                           style: GoogleFonts.poppins(
                             fontSize: 16.0,
                             color: Colors.black,
                           ),
                         ),
-                        value: discolorationChecked,
+                        value: frozenChecked,
                         onChanged: (value) {
                           setState(() {
-                            discolorationChecked = value!;
+                            frozenChecked = value!;
+                          });
+                        },
+                      ),
+                      CheckboxListTile(
+                        title: Text(
+                          'Did you Buy it Indoor?',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16.0,
+                            color: Colors.black,
+                          ),
+                        ),
+                        value: indoorChecked,
+                        onChanged: (value) {
+                          setState(() {
+                            indoorChecked = value!;
                           });
                         },
                       ),
@@ -261,7 +282,8 @@ class FirebaseService {
     String result,
     bool foulSmellChecked,
     bool slimyTextureChecked,
-    bool discolorationChecked,
+    bool frozenChecked,
+    bool indoorChecked,
     String? imageUrl,
     String displayName,
     String email,
@@ -273,13 +295,15 @@ class FirebaseService {
         "additionalInfo": additionalInfo,
         "foulSmellChecked": foulSmellChecked,
         "slimyTextureChecked": slimyTextureChecked,
-        "discolorationChecked": discolorationChecked,
+        "frozenChecked": frozenChecked,
+        "indoorChecked": indoorChecked,
         "classificationResult": result,
         "imageUrl": imageUrl,
         "displayName": displayName,
         "email": email,
         "latitude": latitude,
         "longitude": longitude,
+        // "locationName": locationName, // Remove this line
       });
     } catch (error) {
       print('Error saving data: $error');
