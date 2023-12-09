@@ -26,10 +26,15 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _isModelBusy = false;
   String _classificationResult = 'Unknown';
 
+  bool _isImageSelected =
+      false; // Add a variable to track whether an image is selected
+
+  // Function to handle image selection
   Future<void> _pickImage(ImageSource source) async {
     final pickedFile = await ImagePicker().getImage(source: source);
     setState(() {
       _imageFile = pickedFile != null ? File(pickedFile.path) : null;
+      _isImageSelected = _imageFile != null; // Update _isImageSelected
     });
   }
 
@@ -66,71 +71,96 @@ class _MyHomePageState extends State<MyHomePage> {
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
-            title: Text('Classification Result'),
-            content: Text('The pork is $_classificationResult.'),
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                Column(
+                  children: [
+                    Icon(
+                      _classificationResult == 'Spoiled'
+                          ? Icons.warning
+                          : Icons.check_circle,
+                      color: _classificationResult == 'Spoiled'
+                          ? Colors.red
+                          : Colors.green,
+                      size: 100,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      _classificationResult == 'Spoiled'
+                          ? 'Spoiled Pork Detected!!!'
+                          : 'Fresh Pork Detected!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                if (_classificationResult == 'Spoiled') SizedBox(height: 10),
+                if (_classificationResult == 'Spoiled')
+                  Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      'Report to Authorities',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                SizedBox(height: 10),
+                if (_classificationResult == 'Spoiled')
+                  Text(
+                    'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.red,
+                    ),
+                  ),
+                if (_classificationResult != 'Spoiled') SizedBox(height: 10),
+                if (_classificationResult != 'Spoiled')
+                  Text(
+                    'Fresh Pork is Safe to Consume!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.green,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+              ],
+            ),
             actions: [
+              if (_classificationResult == 'Spoiled')
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Close the current dialog
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) => SpoiledPorkInfoPage(
+                          user: widget.user!,
+                          result: _classificationResult,
+                          imageFile: _imageFile, // Pass the image file
+                        ),
+                      ),
+                    );
+                  },
+                  child: Text('Provide Additional Info'),
+                ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
-                child: Text('OK'),
-              ),
-              TextButton(
-                onPressed: () {
-                  _pickImage(ImageSource.gallery);
-                  Navigator.of(context).pop();
-                },
-                child: Text('Choose Another Photo'),
+                child: Text('Cancel'),
               ),
             ],
           );
         },
       );
-
-      if (_classificationResult == 'Spoiled') {
-        showDialog(
-          context: context,
-          builder: (BuildContext context) {
-            return AlertDialog(
-              title: Text('Spoiled Pork Detected!!!'),
-              content: SingleChildScrollView(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop(); // Close the current dialog
-                        Navigator.of(context).push(
-                          MaterialPageRoute(
-                            builder: (context) => SpoiledPorkInfoPage(
-                              user: widget.user!,
-                              result: _classificationResult,
-                              imageFile: _imageFile, // Pass the image file
-                            ),
-                          ),
-                        );
-                      },
-                      child: Text('Provide Additional Info'),
-                    ),
-                    Text(
-                      'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
-                      style: TextStyle(color: Colors.red),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
-                  child: Text('Cancel'),
-                ),
-              ],
-            );
-          },
-        );
-      }
     } catch (e) {
       print('Error classifying image: $e');
     } finally {
@@ -299,16 +329,20 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Widget buildClassifyButton() {
-    return ElevatedButton(
-      onPressed: _isLoading ? null : _classifyImage,
-      style: ElevatedButton.styleFrom(
-        foregroundColor: Colors.white,
-        backgroundColor: Color(0xFF5347D9),
-        textStyle: GoogleFonts.poppins(
-          fontSize: 14,
-        ),
-      ),
-      child: _isLoading ? CircularProgressIndicator() : Text('Classify Image'),
-    );
+    return _isImageSelected // Only show the button if an image is selected
+        ? ElevatedButton(
+            onPressed: _isLoading ? null : _classifyImage,
+            style: ElevatedButton.styleFrom(
+              foregroundColor: Colors.white,
+              backgroundColor: Color(0xFF5347D9),
+              textStyle: GoogleFonts.poppins(
+                fontSize: 14,
+              ),
+            ),
+            child: _isLoading
+                ? CircularProgressIndicator()
+                : Text('Classify Image'),
+          )
+        : Container(); // Placeholder empty container if no image is selected
   }
 }

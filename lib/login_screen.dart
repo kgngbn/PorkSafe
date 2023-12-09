@@ -12,6 +12,8 @@ class LoginScreen extends StatefulWidget {
   _LoginScreenState createState() => _LoginScreenState();
 }
 
+bool _isLoading = false;
+
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _emailController = TextEditingController();
   TextEditingController _passwordController = TextEditingController();
@@ -183,6 +185,11 @@ class _LoginScreenState extends State<LoginScreen> {
                             context: context,
                           );
                           print(user);
+                          // Set the loading state to false
+                          setState(() {
+                            _isLoading = false;
+                          });
+
                           if (user != null) {
                             Navigator.pushReplacement(
                               context,

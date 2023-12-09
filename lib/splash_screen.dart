@@ -21,8 +21,9 @@ class _SplashScreenState extends State<SplashScreen>
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (context) =>
-                MyHomePage(user: user), // Pass the user to MyHomePage
+            builder: (context) => MyHomePage(
+              user: user,
+            ), // Pass the user to MyHomePage
           ),
         );
       } else {

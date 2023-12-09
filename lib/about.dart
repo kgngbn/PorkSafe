@@ -51,7 +51,7 @@ class AboutPage extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Follow me on social media:',
+              'Follow us on social media:',
               style: GoogleFonts.poppins(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,

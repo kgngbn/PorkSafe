@@ -20,6 +20,8 @@ class SpoiledPorkInfoPage extends StatefulWidget {
 
   @override
   _SpoiledPorkInfoPageState createState() => _SpoiledPorkInfoPageState();
+
+  void clearStateCallback() {}
 }
 
 class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
@@ -134,18 +136,6 @@ class _SpoiledPorkInfoPageState extends State<SpoiledPorkInfoPage> {
                     fontSize: 18.0,
                     color: Colors.black,
                     fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(height: 16.0),
-                Text(
-                  reportSent == null
-                      ? 'Check the appropriate descriptions based on your pork:'
-                      : reportSent!
-                          ? 'Report sent successfully!'
-                          : 'Failed to send the report. Please try again later.',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16.0,
-                    color: Colors.black,
                   ),
                 ),
                 if (widget.imageFile != null)
