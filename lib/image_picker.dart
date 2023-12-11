@@ -45,9 +45,22 @@ class _MyHomePageState extends State<MyHomePage> {
 
     if (_isModelBusy) return;
 
-    setState(() {
-      _isLoading = true;
-    });
+    showDialog(
+      context: context,
+      barrierDismissible: false, // Prevent dismissing while loading
+      builder: (BuildContext context) {
+        return AlertDialog(
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text('Loading...'),
+            ],
+          ),
+        );
+      },
+    );
 
     try {
       _isModelBusy = true;
@@ -60,6 +73,8 @@ class _MyHomePageState extends State<MyHomePage> {
         threshold: 0.2,
         asynch: true,
       );
+
+      Navigator.of(context).pop(); // Close the loading dialog
 
       _classificationResult = 'Unknown';
 
@@ -97,31 +112,57 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
                   ],
                 ),
-                if (_classificationResult == 'Spoiled') SizedBox(height: 10),
-                if (_classificationResult == 'Spoiled')
-                  Container(
-                    padding: EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Text(
-                      'Report to Authorities',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ),
                 SizedBox(height: 10),
                 if (_classificationResult == 'Spoiled')
-                  Text(
-                    'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.red,
-                    ),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    children: [
+                      Container(
+                        padding:
+                            EdgeInsets.all(2), // Add padding around the button
+                        decoration: BoxDecoration(
+                          color: Colors.blue,
+                          borderRadius:
+                              BorderRadius.circular(30), // Change border radius
+                        ),
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context)
+                                .pop(); // Close the current dialog
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (context) => SpoiledPorkInfoPage(
+                                  user: widget.user!,
+                                  result: _classificationResult,
+                                  imageFile: _imageFile, // Pass the image file
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            primary: Colors
+                                .transparent, // Set the button background color as transparent
+                            elevation: 0, // Remove button elevation
+                          ),
+                          child: Text(
+                            'Report to Authorities', // Change button text here
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
+                SizedBox(height: 10),
+                Text(
+                  'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    color: Colors.red,
+                  ),
+                ),
                 if (_classificationResult != 'Spoiled') SizedBox(height: 10),
                 if (_classificationResult != 'Spoiled')
                   Text(
@@ -135,22 +176,6 @@ class _MyHomePageState extends State<MyHomePage> {
               ],
             ),
             actions: [
-              if (_classificationResult == 'Spoiled')
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Close the current dialog
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => SpoiledPorkInfoPage(
-                          user: widget.user!,
-                          result: _classificationResult,
-                          imageFile: _imageFile, // Pass the image file
-                        ),
-                      ),
-                    );
-                  },
-                  child: Text('Provide Additional Info'),
-                ),
               TextButton(
                 onPressed: () {
                   Navigator.of(context).pop();
