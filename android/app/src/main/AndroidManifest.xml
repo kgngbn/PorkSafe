@@ -6,7 +6,7 @@
 
 
    <application
-        android:label="chapter_03"
+        android:label="PorkSafe"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

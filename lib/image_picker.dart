@@ -47,7 +47,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
     showDialog(
       context: context,
-      barrierDismissible: false, // Prevent dismissing while loading
+      barrierDismissible: false,
       builder: (BuildContext context) {
         return AlertDialog(
           content: Column(
@@ -85,105 +85,142 @@ class _MyHomePageState extends State<MyHomePage> {
       showDialog(
         context: context,
         builder: (BuildContext context) {
-          return AlertDialog(
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Column(
-                  children: [
-                    Icon(
-                      _classificationResult == 'Spoiled'
-                          ? Icons.warning
-                          : Icons.check_circle,
-                      color: _classificationResult == 'Spoiled'
-                          ? Colors.red
-                          : Colors.green,
-                      size: 100,
+          if (!_isExpectedLabel(_classificationResult)) {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Icon(
+                    Icons.warning,
+                    color: Colors.red,
+                    size: 100,
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Photo does not match the trained model!',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
                     ),
-                    SizedBox(height: 10),
-                    Text(
-                      _classificationResult == 'Spoiled'
-                          ? 'Spoiled Pork Detected!!!'
-                          : 'Fresh Pork Detected!',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
+                  ),
+                  SizedBox(height: 10),
+                  Text(
+                    'Please try again with a different photo.',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('OK'),
                 ),
-                SizedBox(height: 10),
-                if (_classificationResult == 'Spoiled')
-                  Wrap(
-                    alignment: WrapAlignment.center,
+              ],
+            );
+          } else {
+            return AlertDialog(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  Column(
                     children: [
-                      Container(
-                        padding:
-                            EdgeInsets.all(2), // Add padding around the button
-                        decoration: BoxDecoration(
-                          color: Colors.blue,
-                          borderRadius:
-                              BorderRadius.circular(30), // Change border radius
-                        ),
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context)
-                                .pop(); // Close the current dialog
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => SpoiledPorkInfoPage(
-                                  user: widget.user!,
-                                  result: _classificationResult,
-                                  imageFile: _imageFile, // Pass the image file
-                                ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            primary: Colors
-                                .transparent, // Set the button background color as transparent
-                            elevation: 0, // Remove button elevation
-                          ),
-                          child: Text(
-                            'Report to Authorities', // Change button text here
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                      Icon(
+                        _classificationResult == 'Spoiled'
+                            ? Icons.warning
+                            : Icons.check_circle,
+                        color: _classificationResult == 'Spoiled'
+                            ? Colors.red
+                            : Colors.green,
+                        size: 100,
+                      ),
+                      SizedBox(height: 10),
+                      Text(
+                        _classificationResult == 'Spoiled'
+                            ? 'Spoiled Pork Detected!!!'
+                            : 'Fresh Pork Detected!',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
                   ),
-                SizedBox(height: 10),
-                Text(
-                  'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.red,
-                  ),
-                ),
-                if (_classificationResult != 'Spoiled') SizedBox(height: 10),
-                if (_classificationResult != 'Spoiled')
+                  SizedBox(height: 10),
+                  if (_classificationResult == 'Spoiled')
+                    Wrap(
+                      alignment: WrapAlignment.center,
+                      children: [
+                        Container(
+                          padding: EdgeInsets.all(
+                              2), // Add padding around the button
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            borderRadius: BorderRadius.circular(
+                                30), // Change border radius
+                          ),
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context)
+                                  .pop(); // Close the current dialog
+                              Navigator.of(context).push(
+                                MaterialPageRoute(
+                                  builder: (context) => SpoiledPorkInfoPage(
+                                    user: widget.user!,
+                                    result: _classificationResult,
+                                    imageFile:
+                                        _imageFile, // Pass the image file
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              primary: Colors
+                                  .transparent, // Set the button background color as transparent
+                              elevation: 0, // Remove button elevation
+                            ),
+                            child: Text(
+                              'Report to Authorities', // Change button text here
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  SizedBox(height: 10),
                   Text(
-                    'Fresh Pork is Safe to Consume!',
+                    'Note: White spots on pork do not necessarily indicate spoilage but may be a sign of meat contamination. Consuming contaminated pork can lead to the development of harmful tapeworms inside the human body.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: Colors.green,
-                      fontWeight: FontWeight.bold,
+                      color: Colors.red,
                     ),
                   ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Cancel'),
+                  if (_classificationResult != 'Spoiled') SizedBox(height: 10),
+                  if (_classificationResult != 'Spoiled')
+                    Text(
+                      'Fresh Pork is Safe to Consume!',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.green,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                ],
               ),
-            ],
-          );
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text('Cancel'),
+                ),
+              ],
+            );
+          }
         },
       );
     } catch (e) {
@@ -194,6 +231,12 @@ class _MyHomePageState extends State<MyHomePage> {
         _isLoading = false;
       });
     }
+  }
+
+  bool _isExpectedLabel(String label) {
+    // Replace ['ExpectedLabel'] with your actual expected labels
+    List<String> expectedLabels = ['Spoiled', 'Fresh', 'Not Identified'];
+    return expectedLabels.contains(label);
   }
 
   void loadModel() async {
